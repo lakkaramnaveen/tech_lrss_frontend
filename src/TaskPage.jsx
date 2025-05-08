@@ -116,7 +116,9 @@ function App() {
             }
 
             if (value.trim().length > 0 && value.trim().length < 5) {
-              setTitleLengthError("Enter at least 5 characters");
+              setTitleLengthError(
+                `Enter at least 5 characters (${value.trim().length}/5)`,
+              );
             } else {
               setTitleLengthError("");
             }
@@ -137,7 +139,9 @@ function App() {
             setDescription(value);
 
             if (value.trim().length > 0 && value.trim().length < 5) {
-              setDescriptionError("Enter at least 5 characters");
+              setDescriptionError(
+                `Enter at least 5 characters (${value.trim().length}/5)`,
+              );
             } else {
               setDescriptionError("");
             }

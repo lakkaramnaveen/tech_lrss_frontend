@@ -11,6 +11,8 @@ function App() {
   const [description, setDescription] = useState("");
   const [error, setError] = useState("");
   const [editingId, setEditingId] = useState(null);
+  const [titleLengthError, setTitleLengthError] = useState("");
+  const [descriptionError, setDescriptionError] = useState("");
 
   useEffect(() => {
     fetchTasks();
@@ -23,7 +25,12 @@ function App() {
 
   const isValidTitle = /^[a-zA-Z0-9 ]+$/.test(title.trim());
   const isFormValid =
-    title.trim().length >= 3 && description.trim().length >= 3 && isValidTitle;
+    title.trim().length >= 5 &&
+    description.trim().length >= 5 &&
+    isValidTitle &&
+    !titleError &&
+    !titleLengthError &&
+    !descriptionError;
 
   const addOrUpdateTask = async () => {
     if (!title.trim() || title.trim().length < 3) {
@@ -101,10 +108,17 @@ function App() {
           onChange={(e) => {
             const value = e.target.value;
             setTitle(value);
-            if (value.trim().length >= 1 && !/^[a-zA-Z0-9 ]*$/.test(value)) {
+
+            if (value.trim().length > 0 && !/^[a-zA-Z0-9 ]*$/.test(value)) {
               setTitleError("Enter alphabets and numbers only");
             } else {
               setTitleError("");
+            }
+
+            if (value.trim().length > 0 && value.trim().length < 5) {
+              setTitleLengthError("Enter at least 5 characters");
+            } else {
+              setTitleLengthError("");
             }
           }}
           placeholder="Title"
@@ -113,13 +127,28 @@ function App() {
         {titleError && (
           <p className="text-red-500 text-sm mb-2">{titleError}</p>
         )}
+        {titleLengthError && (
+          <p className="text-red-500 text-sm mb-2">{titleLengthError}</p>
+        )}
         <textarea
           value={description}
-          onChange={(e) => setDescription(e.target.value)}
+          onChange={(e) => {
+            const value = e.target.value;
+            setDescription(value);
+
+            if (value.trim().length > 0 && value.trim().length < 5) {
+              setDescriptionError("Enter at least 5 characters");
+            } else {
+              setDescriptionError("");
+            }
+          }}
           placeholder="Description"
           className="w-full p-2 border mb-2 rounded"
         />
         {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
+        {descriptionError && (
+          <p className="text-red-500 text-sm mb-2">{descriptionError}</p>
+        )}
         <button
           onClick={addOrUpdateTask}
           className={`w-full px-4 py-2 rounded text-white transition ${

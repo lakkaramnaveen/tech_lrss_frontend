@@ -7,6 +7,7 @@ const API_URL = "http://localhost:8000/tasks";
 function App() {
   const [tasks, setTasks] = useState([]);
   const [title, setTitle] = useState("");
+  const [titleError, setTitleError] = useState("");
   const [description, setDescription] = useState("");
   const [error, setError] = useState("");
   const [editingId, setEditingId] = useState(null);
@@ -20,12 +21,21 @@ function App() {
     setTasks(res.data);
   };
 
+  const isValidTitle = /^[a-zA-Z0-9 ]+$/.test(title.trim());
   const isFormValid =
-    title.trim().length >= 3 && description.trim().length >= 3;
+    title.trim().length >= 3 && description.trim().length >= 3 && isValidTitle;
 
   const addOrUpdateTask = async () => {
-    if (!isFormValid) {
-      setError("Both title and description must be at least 3 characters.");
+    if (!title.trim() || title.trim().length < 3) {
+      setError("Title must be at least 3 characters.");
+      return;
+    }
+    if (!isValidTitle) {
+      setError("Title must not contain special characters.");
+      return;
+    }
+    if (!description.trim() || description.trim().length < 3) {
+      setError("Description must be at least 3 characters.");
       return;
     }
 
@@ -88,10 +98,21 @@ function App() {
         <input
           type="text"
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={(e) => {
+            const value = e.target.value;
+            setTitle(value);
+            if (value.trim().length >= 1 && !/^[a-zA-Z0-9 ]*$/.test(value)) {
+              setTitleError("Enter alphabets and numbers only");
+            } else {
+              setTitleError("");
+            }
+          }}
           placeholder="Title"
-          className="w-full p-2 border mb-2 rounded"
+          className="w-full p-2 border mb-1 rounded"
         />
+        {titleError && (
+          <p className="text-red-500 text-sm mb-2">{titleError}</p>
+        )}
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}

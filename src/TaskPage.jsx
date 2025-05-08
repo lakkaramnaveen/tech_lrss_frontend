@@ -81,8 +81,17 @@ function App() {
   };
 
   const deleteTask = async (id) => {
-    await axios.delete(`${API_URL}/${id}`);
-    setTasks(tasks.filter((task) => task.id !== id));
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this task? This action cannot be undone.",
+    );
+    if (!confirmed) return;
+
+    try {
+      await axios.delete(`${API_URL}/${id}`);
+      setTasks(tasks.filter((task) => task.id !== id));
+    } catch (error) {
+      alert("Failed to delete the task. Please try again.");
+    }
   };
 
   const toggleTask = async (id) => {

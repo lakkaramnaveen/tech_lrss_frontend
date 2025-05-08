@@ -14,6 +14,17 @@ function App() {
   const [titleLengthError, setTitleLengthError] = useState("");
   const [descriptionError, setDescriptionError] = useState("");
 
+  const isValidTitle = /^[a-zA-Z0-9 ]+$/.test(title.trim());
+  const isFormValid =
+    title.trim().length >= 5 &&
+    title.trim().length <= 500 &&
+    description.trim().length >= 5 &&
+    description.trim().length <= 500 &&
+    isValidTitle &&
+    !titleError &&
+    !titleLengthError &&
+    !descriptionError;
+
   useEffect(() => {
     fetchTasks();
   }, []);
@@ -22,15 +33,6 @@ function App() {
     const res = await axios.get(API_URL);
     setTasks(res.data);
   };
-
-  const isValidTitle = /^[a-zA-Z0-9 ]+$/.test(title.trim());
-  const isFormValid =
-    title.trim().length >= 5 &&
-    description.trim().length >= 5 &&
-    isValidTitle &&
-    !titleError &&
-    !titleLengthError &&
-    !descriptionError;
 
   const addOrUpdateTask = async () => {
     if (!title.trim() || title.trim().length < 3) {
@@ -115,10 +117,9 @@ function App() {
               setTitleError("");
             }
 
-            if (value.trim().length > 0 && value.trim().length < 5) {
-              setTitleLengthError(
-                `Enter at least 5 characters (${value.trim().length}/5)`,
-              );
+            const len = value.trim().length;
+            if (len > 0 && (len < 5 || len > 500)) {
+              setTitleLengthError(`Enter 5-500 characters (currently ${len})`);
             } else {
               setTitleLengthError("");
             }
@@ -138,10 +139,9 @@ function App() {
             const value = e.target.value;
             setDescription(value);
 
-            if (value.trim().length > 0 && value.trim().length < 5) {
-              setDescriptionError(
-                `Enter at least 5 characters (${value.trim().length}/5)`,
-              );
+            const len = value.trim().length;
+            if (len > 0 && (len < 5 || len > 500)) {
+              setDescriptionError(`Enter 5-500 characters (currently ${len})`);
             } else {
               setDescriptionError("");
             }

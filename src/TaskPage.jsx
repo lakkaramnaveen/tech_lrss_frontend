@@ -7,10 +7,10 @@ const API_URL = "http://localhost:8000/tasks";
 function App() {
   const [tasks, setTasks] = useState([]);
   const [title, setTitle] = useState("");
-  const [titleError, setTitleError] = useState("");
   const [description, setDescription] = useState("");
   const [error, setError] = useState("");
   const [editingId, setEditingId] = useState(null);
+  const [titleError, setTitleError] = useState("");
   const [titleLengthError, setTitleLengthError] = useState("");
   const [descriptionError, setDescriptionError] = useState("");
   const [selectedTasks, setSelectedTasks] = useState([]);
@@ -36,16 +36,16 @@ function App() {
   };
 
   const addOrUpdateTask = async () => {
-    if (!title.trim() || title.trim().length < 3) {
-      setError("Title must be at least 3 characters.");
+    if (!title.trim() || title.trim().length < 5) {
+      setError("Title must be at least 5 characters.");
       return;
     }
     if (!isValidTitle) {
       setError("Title must not contain special characters.");
       return;
     }
-    if (!description.trim() || description.trim().length < 3) {
-      setError("Description must be at least 3 characters.");
+    if (!description.trim() || description.trim().length < 5) {
+      setError("Description must be at least 5 characters.");
       return;
     }
 
@@ -81,7 +81,7 @@ function App() {
 
   const deleteTask = async (id) => {
     const confirmed = window.confirm(
-      "Are you sure you want to delete this task? This action cannot be undone.",
+      "Are you sure you want to delete this task?",
     );
     if (!confirmed) return;
 
@@ -95,9 +95,12 @@ function App() {
 
   const toggleComplete = async (task) => {
     try {
-      const res = await axios.patch(`${API_URL}/${task.id}/toggle`);
+      const res = await axios.patch(`${API_URL}/${task.id}`, {
+        completed: !task.completed,
+      });
       setTasks(tasks.map((t) => (t.id === task.id ? res.data : t)));
     } catch (err) {
+      console.error(err);
       alert("Failed to update task status.");
     }
   };
@@ -140,10 +143,10 @@ function App() {
           className="w-full p-2 border mb-1 rounded"
         />
         {titleError && (
-          <p className="text-red-500 text-sm mb-2">{titleError}</p>
+          <p className="text-red-500 text-sm mb-1">{titleError}</p>
         )}
         {titleLengthError && (
-          <p className="text-red-500 text-sm mb-2">{titleLengthError}</p>
+          <p className="text-red-500 text-sm mb-1">{titleLengthError}</p>
         )}
 
         <textarea
@@ -162,9 +165,9 @@ function App() {
           placeholder="Description"
           className="w-full p-2 border mb-2 rounded"
         />
-        {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
+        {error && <p className="text-red-500 text-sm mb-1">{error}</p>}
         {descriptionError && (
-          <p className="text-red-500 text-sm mb-2">{descriptionError}</p>
+          <p className="text-red-500 text-sm mb-1">{descriptionError}</p>
         )}
 
         <button
@@ -180,6 +183,7 @@ function App() {
         </button>
       </div>
 
+      {/* Select All Checkbox */}
       <div className="flex items-center mb-2">
         <input
           type="checkbox"
@@ -196,11 +200,12 @@ function App() {
         <label>Select All</label>
       </div>
 
+      {/* Bulk Delete */}
       {selectedTasks.length > 0 && (
         <button
           onClick={async () => {
             const confirmed = window.confirm(
-              `Delete ${selectedTasks.length} selected task(s)? This cannot be undone.`,
+              `Delete ${selectedTasks.length} selected tasks?`,
             );
             if (!confirmed) return;
 
@@ -220,6 +225,7 @@ function App() {
         </button>
       )}
 
+      {/* Task List */}
       <div>
         {tasks.map((task) => (
           <div
@@ -243,12 +249,16 @@ function App() {
 
             <div className="flex-1">
               <h3
-                className={`text-lg font-semibold ${task.completed ? "line-through text-gray-500" : ""}`}
+                className={`text-lg font-semibold ${
+                  task.completed ? "line-through text-gray-500" : ""
+                }`}
               >
                 {task.title}
               </h3>
               <p
-                className={`text-gray-600 ${task.completed ? "line-through text-gray-400" : ""}`}
+                className={`text-gray-600 ${
+                  task.completed ? "line-through text-gray-400" : ""
+                }`}
               >
                 {task.description}
               </p>
@@ -256,11 +266,11 @@ function App() {
 
             <button
               onClick={() => toggleComplete(task)}
-              className={`px-2 py-1 rounded text-sm font-medium ${
+              className={`text-sm px-3 py-1 rounded mr-2 font-semibold ${
                 task.completed
-                  ? "bg-yellow-500 text-white hover:bg-yellow-600"
-                  : "bg-green-500 text-white hover:bg-green-600"
-              } mr-2`}
+                  ? "bg-green-100 text-green-700"
+                  : "bg-gray-200 text-gray-700"
+              }`}
             >
               {task.completed ? "Undo" : "Complete"}
             </button>
@@ -271,6 +281,7 @@ function App() {
             >
               Edit
             </button>
+
             <button
               onClick={() => deleteTask(task.id)}
               className="text-red-500"

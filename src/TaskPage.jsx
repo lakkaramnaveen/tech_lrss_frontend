@@ -13,7 +13,7 @@ function App() {
   const [editingId, setEditingId] = useState(null);
   const [titleLengthError, setTitleLengthError] = useState("");
   const [descriptionError, setDescriptionError] = useState("");
-  const [selectedTasks, setSelectedTasks] = useState([]);
+  
 
   const isValidTitle = /^[a-zA-Z0-9 ]+$/.test(title.trim());
   const isFormValid =
@@ -175,45 +175,6 @@ function App() {
           {editingId ? "Update Task" : "Add Task"}
         </button>
       </div>
-      <div className="flex items-center mb-2">
-        <input
-          type="checkbox"
-          checked={selectedTasks.length === tasks.length && tasks.length > 0}
-          onChange={(e) => {
-            if (e.target.checked) {
-              setSelectedTasks(tasks.map((t) => t.id));
-            } else {
-              setSelectedTasks([]);
-            }
-          }}
-          className="mr-2"
-        />
-        <label>Select All</label>
-      </div>
-
-      {selectedTasks.length > 0 && (
-        <button
-          onClick={async () => {
-            const confirmed = window.confirm(
-              `Delete ${selectedTasks.length} selected task(s)? This cannot be undone.`,
-            );
-            if (!confirmed) return;
-
-            try {
-              await Promise.all(
-                selectedTasks.map((id) => axios.delete(`${API_URL}/${id}`)),
-              );
-              setTasks(tasks.filter((t) => !selectedTasks.includes(t.id)));
-              setSelectedTasks([]);
-            } catch (err) {
-              alert("Failed to delete selected tasks.");
-            }
-          }}
-          className="bg-red-600 text-white px-4 py-2 rounded mb-4"
-        >
-          Delete Selected
-        </button>
-      )}
 
       <div>
         {tasks.map((task) => (

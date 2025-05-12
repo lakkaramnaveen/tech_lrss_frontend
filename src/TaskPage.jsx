@@ -13,7 +13,7 @@ function App() {
   const [editingId, setEditingId] = useState(null);
   const [titleLengthError, setTitleLengthError] = useState("");
   const [descriptionError, setDescriptionError] = useState("");
-  
+  const [selectedTasks, setSelectedTasks] = useState([]);
 
   const isValidTitle = /^[a-zA-Z0-9 ]+$/.test(title.trim());
   const isFormValid =
@@ -51,7 +51,6 @@ function App() {
 
     try {
       if (editingId) {
-        // UPDATE
         const res = await axios.put(`${API_URL}/${editingId}`, {
           id: editingId,
           title,
@@ -63,7 +62,6 @@ function App() {
         );
         setEditingId(null);
       } else {
-        // ADD
         const res = await axios.post(API_URL, {
           id: "",
           title,
@@ -93,11 +91,6 @@ function App() {
     } catch (error) {
       alert("Failed to delete the task. Please try again.");
     }
-  };
-
-  const toggleTask = async (id) => {
-    const res = await axios.patch(`${API_URL}/${id}/toggle`);
-    setTasks(tasks.map((task) => (task.id === id ? res.data : task)));
   };
 
   const startEditing = (task) => {
@@ -176,42 +169,85 @@ function App() {
         </button>
       </div>
 
+      {/* Select All Checkbox */}
+      <div className="flex items-center mb-2">
+        <input
+          type="checkbox"
+          checked={selectedTasks.length === tasks.length && tasks.length > 0}
+          onChange={(e) => {
+            if (e.target.checked) {
+              setSelectedTasks(tasks.map((t) => t.id));
+            } else {
+              setSelectedTasks([]);
+            }
+          }}
+          className="mr-2"
+        />
+        <label>Select All</label>
+      </div>
+
+      {/* Delete Selected Button */}
+      {selectedTasks.length > 0 && (
+        <button
+          onClick={async () => {
+            const confirmed = window.confirm(
+              `Delete ${selectedTasks.length} selected task(s)? This cannot be undone.`,
+            );
+            if (!confirmed) return;
+
+            try {
+              await Promise.all(
+                selectedTasks.map((id) => axios.delete(`${API_URL}/${id}`)),
+              );
+              setTasks(tasks.filter((t) => !selectedTasks.includes(t.id)));
+              setSelectedTasks([]);
+            } catch (err) {
+              alert("Failed to delete selected tasks.");
+            }
+          }}
+          className="bg-red-600 text-white px-4 py-2 rounded mb-4"
+        >
+          Delete Selected
+        </button>
+      )}
+
+      {/* Task List */}
       <div>
         {tasks.map((task) => (
           <div
             key={task.id}
-            className="flex justify-between items-center bg-gray-100 p-3 mb-2 rounded shadow"
+            className="bg-white p-4 rounded shadow mb-2 flex items-center"
           >
-            <div>
-              <h2
-                className={`text-xl font-semibold ${
-                  task.completed ? "line-through text-gray-500" : ""
-                }`}
-              >
-                {task.title}
-              </h2>
-              <p className="text-sm text-gray-700">{task.description}</p>
+            <input
+              type="checkbox"
+              checked={selectedTasks.includes(task.id)}
+              onChange={(e) => {
+                if (e.target.checked) {
+                  setSelectedTasks([...selectedTasks, task.id]);
+                } else {
+                  setSelectedTasks(
+                    selectedTasks.filter((id) => id !== task.id),
+                  );
+                }
+              }}
+              className="mr-2"
+            />
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold">{task.title}</h3>
+              <p className="text-gray-600">{task.description}</p>
             </div>
-            <div className="flex space-x-2">
-              <button
-                onClick={() => toggleTask(task.id)}
-                className="bg-green-500 text-white px-3 py-1 rounded"
-              >
-                {task.completed ? "Undo" : "Complete"}
-              </button>
-              <button
-                onClick={() => startEditing(task)}
-                className="bg-yellow-500 text-white px-3 py-1 rounded"
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => deleteTask(task.id)}
-                className="bg-red-500 text-white px-3 py-1 rounded"
-              >
-                Delete
-              </button>
-            </div>
+            <button
+              onClick={() => startEditing(task)}
+              className="text-blue-500 mr-2"
+            >
+              Edit
+            </button>
+            <button
+              onClick={() => deleteTask(task.id)}
+              className="text-red-500"
+            >
+              Delete
+            </button>
           </div>
         ))}
       </div>

@@ -93,6 +93,21 @@ function App() {
     }
   };
 
+  const toggleComplete = async (task) => {
+    try {
+      const res = await axios.patch(`${API_URL}/${task.id}`, {
+        completed: !task.completed,
+      });
+      setTasks(
+        tasks.map((t) =>
+          t.id === task.id ? { ...t, completed: !t.completed } : t,
+        ),
+      );
+    } catch (err) {
+      alert("Failed to update task status.");
+    }
+  };
+
   const startEditing = (task) => {
     setTitle(task.title);
     setDescription(task.description);
@@ -169,7 +184,7 @@ function App() {
         </button>
       </div>
 
-      {/* Select All Checkbox */}
+      {/* Select All */}
       <div className="flex items-center mb-2">
         <input
           type="checkbox"
@@ -186,7 +201,6 @@ function App() {
         <label>Select All</label>
       </div>
 
-      {/* Delete Selected Button */}
       {selectedTasks.length > 0 && (
         <button
           onClick={async () => {
@@ -232,9 +246,28 @@ function App() {
               }}
               className="mr-2"
             />
+            <input
+              type="checkbox"
+              checked={task.completed}
+              onChange={() => toggleComplete(task)}
+              className="mr-2"
+              title="Mark as complete"
+            />
             <div className="flex-1">
-              <h3 className="text-lg font-semibold">{task.title}</h3>
-              <p className="text-gray-600">{task.description}</p>
+              <h3
+                className={`text-lg font-semibold ${
+                  task.completed ? "line-through text-gray-500" : ""
+                }`}
+              >
+                {task.title}
+              </h3>
+              <p
+                className={`text-gray-600 ${
+                  task.completed ? "line-through text-gray-400" : ""
+                }`}
+              >
+                {task.description}
+              </p>
             </div>
             <button
               onClick={() => startEditing(task)}

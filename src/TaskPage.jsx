@@ -95,14 +95,8 @@ function App() {
 
   const toggleComplete = async (task) => {
     try {
-      const res = await axios.patch(`${API_URL}/${task.id}`, {
-        completed: !task.completed,
-      });
-      setTasks(
-        tasks.map((t) =>
-          t.id === task.id ? { ...t, completed: !t.completed } : t,
-        ),
-      );
+      const res = await axios.patch(`${API_URL}/${task.id}/toggle`);
+      setTasks(tasks.map((t) => (t.id === task.id ? res.data : t)));
     } catch (err) {
       alert("Failed to update task status.");
     }
@@ -151,6 +145,7 @@ function App() {
         {titleLengthError && (
           <p className="text-red-500 text-sm mb-2">{titleLengthError}</p>
         )}
+
         <textarea
           value={description}
           onChange={(e) => {
@@ -171,6 +166,7 @@ function App() {
         {descriptionError && (
           <p className="text-red-500 text-sm mb-2">{descriptionError}</p>
         )}
+
         <button
           onClick={addOrUpdateTask}
           className={`w-full px-4 py-2 rounded text-white transition ${
@@ -184,7 +180,6 @@ function App() {
         </button>
       </div>
 
-      {/* Select All */}
       <div className="flex items-center mb-2">
         <input
           type="checkbox"
@@ -225,7 +220,6 @@ function App() {
         </button>
       )}
 
-      {/* Task List */}
       <div>
         {tasks.map((task) => (
           <div
@@ -246,29 +240,31 @@ function App() {
               }}
               className="mr-2"
             />
-            <input
-              type="checkbox"
-              checked={task.completed}
-              onChange={() => toggleComplete(task)}
-              className="mr-2"
-              title="Mark as complete"
-            />
+
             <div className="flex-1">
               <h3
-                className={`text-lg font-semibold ${
-                  task.completed ? "line-through text-gray-500" : ""
-                }`}
+                className={`text-lg font-semibold ${task.completed ? "line-through text-gray-500" : ""}`}
               >
                 {task.title}
               </h3>
               <p
-                className={`text-gray-600 ${
-                  task.completed ? "line-through text-gray-400" : ""
-                }`}
+                className={`text-gray-600 ${task.completed ? "line-through text-gray-400" : ""}`}
               >
                 {task.description}
               </p>
             </div>
+
+            <button
+              onClick={() => toggleComplete(task)}
+              className={`px-2 py-1 rounded text-sm font-medium ${
+                task.completed
+                  ? "bg-yellow-500 text-white hover:bg-yellow-600"
+                  : "bg-green-500 text-white hover:bg-green-600"
+              } mr-2`}
+            >
+              {task.completed ? "Undo" : "Complete"}
+            </button>
+
             <button
               onClick={() => startEditing(task)}
               className="text-blue-500 mr-2"

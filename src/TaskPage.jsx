@@ -183,47 +183,48 @@ function App() {
         </button>
       </div>
 
-      {/* Select All Checkbox */}
-      <div className="flex items-center mb-2">
-        <input
-          type="checkbox"
-          checked={selectedTasks.length === tasks.length && tasks.length > 0}
-          onChange={(e) => {
-            if (e.target.checked) {
-              setSelectedTasks(tasks.map((t) => t.id));
-            } else {
-              setSelectedTasks([]);
-            }
-          }}
-          className="mr-2"
-        />
-        <label>Select All</label>
-      </div>
+      {/* Select All & Bulk Delete Row */}
+      <div className="flex justify-between items-center mb-4">
+        <div className="flex items-center">
+          <input
+            type="checkbox"
+            checked={selectedTasks.length === tasks.length && tasks.length > 0}
+            onChange={(e) => {
+              if (e.target.checked) {
+                setSelectedTasks(tasks.map((t) => t.id));
+              } else {
+                setSelectedTasks([]);
+              }
+            }}
+            className="mr-2"
+          />
+          <label>Select All</label>
+        </div>
 
-      {/* Bulk Delete */}
-      {selectedTasks.length > 0 && (
-        <button
-          onClick={async () => {
-            const confirmed = window.confirm(
-              `Delete ${selectedTasks.length} selected tasks?`,
-            );
-            if (!confirmed) return;
-
-            try {
-              await Promise.all(
-                selectedTasks.map((id) => axios.delete(`${API_URL}/${id}`)),
+        {selectedTasks.length > 0 && (
+          <button
+            onClick={async () => {
+              const confirmed = window.confirm(
+                `Delete ${selectedTasks.length} selected tasks?`,
               );
-              setTasks(tasks.filter((t) => !selectedTasks.includes(t.id)));
-              setSelectedTasks([]);
-            } catch (err) {
-              alert("Failed to delete selected tasks.");
-            }
-          }}
-          className="bg-red-600 text-white px-4 py-2 rounded mb-4"
-        >
-          Delete Selected
-        </button>
-      )}
+              if (!confirmed) return;
+
+              try {
+                await Promise.all(
+                  selectedTasks.map((id) => axios.delete(`${API_URL}/${id}`)),
+                );
+                setTasks(tasks.filter((t) => !selectedTasks.includes(t.id)));
+                setSelectedTasks([]);
+              } catch (err) {
+                alert("Failed to delete selected tasks.");
+              }
+            }}
+            className="bg-red-600 text-white px-4 py-2 rounded"
+          >
+            Delete Selected
+          </button>
+        )}
+      </div>
 
       {/* Task List */}
       <div>
